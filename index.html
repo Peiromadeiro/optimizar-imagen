@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimización de Imágenes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center text-primary">Optimización de Imágenes</h1>
+        <p class="text-center">Sube tu imagen y optimízala para la web (600x400 píxeles).</p>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-warning" role="alert">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data" action="/optimize" class="text-center">
+            <div class="mb-3">
+                <input class="form-control" type="file" name="image" accept="image/*">
+            </div>
+            <button class="btn btn-success">Optimizar Imagen</button>
+        </form>
+
+        <footer class="text-center mt-5">
+            <p>&copy; 2024 - Optimización de Imágenes</p>
+        </footer>
+    </div>
+</body>
+</html>
