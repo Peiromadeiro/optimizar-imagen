@@ -1,9 +1,9 @@
-import requests
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from PIL import Image, ImageOps
 import os
 from io import BytesIO
 from werkzeug.utils import secure_filename
+import requests
 
 # Configuración de la aplicación
 app = Flask(__name__)
@@ -74,7 +74,13 @@ def optimize_image():
         resized_img.save(buffer, format="JPEG", optimize=True, quality=85)
         buffer.seek(0)
 
-        return send_file(buffer, mimetype='image/jpeg', as_attachment=True, download_name='optimized_image.jpg')
+        # Configurar la respuesta para forzar la descarga
+        return send_file(
+            buffer,
+            mimetype='image/jpeg',
+            as_attachment=True,  # Esto fuerza la descarga
+            download_name='optimized_image.jpg'  # Nombre del archivo descargado
+        )
     except Exception as e:
         flash(f"Error al procesar la imagen: {e}")
         return redirect(url_for('home'))
@@ -83,3 +89,4 @@ if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
