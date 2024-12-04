@@ -1,13 +1,14 @@
-from flask import Flask, request, render_template, send_file, flash, redirect, url_for
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from PIL import Image
 import os
 from io import BytesIO
 from werkzeug.utils import secure_filename
 
+# Configuración de la aplicación
 app = Flask(__name__)
 app.secret_key = 'secret_key_for_flash_messages'
 
-# Configuración de carpetas y formatos permitidos
+# Carpetas y formatos permitidos
 UPLOAD_FOLDER = 'uploads'
 OPTIMIZED_FOLDER = 'optimized'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'bmp', 'tiff'}
@@ -17,14 +18,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
+    """Verifica si el archivo tiene una extensión permitida."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def home():
+    """Renderiza la página principal."""
     return render_template('index.html')
 
 @app.route('/optimize', methods=['POST'])
 def optimize_image():
+    """Optimiza la imagen cargada."""
     if 'image' not in request.files:
         flash("No se ha seleccionado ninguna imagen.")
         return redirect(url_for('home'))
@@ -68,6 +72,5 @@ def optimize_image():
 
 if __name__ == '__main__':
     import os
-
-port = int(os.environ.get('PORT', 5000))
-app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
