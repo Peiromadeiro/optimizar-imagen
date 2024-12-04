@@ -48,21 +48,27 @@ def optimize_image():
 
             # Abrir y procesar la imagen
             img = Image.open(file_path)
-            img = img.resize((600, 400), Image.ANTIALIAS)
+            img = img.resize((600, 400), Image.Resampling.LANCZOS)
 
-            # Convertir a formato JPEG para optimización
+            # Convertir a formato RGB si es necesario (para JPG)
+            if img.mode in ('RGBA', 'P'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                img = Image.alpha_composite(background, img.convert('RGBA'))
+
+            # Guardar como JPG optimizado
             buffer = BytesIO()
-            img_format = 'JPEG' if img.format != 'PNG' else 'PNG'
-            img.save(buffer, format=img_format, optimize=True, quality=85)
+            img.save(buffer, format="JPEG", optimize=True, quality=85)
             buffer.seek(0)
 
-            # Guardar la imagen optimizada
-            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"optimized_{filename}")
+            # Guardar la imagen optimizada localmente (opcional)
+            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"optimized_image.jpg")
             with open(optimized_path, 'wb') as f:
                 f.write(buffer.read())
 
+            # Devolver la imagen optimizada al cliente
+            buffer.seek(0)
             flash("Imagen optimizada con éxito. Descárgala abajo.")
-            return send_file(buffer, mimetype=f'image/{img_format.lower()}', as_attachment=True, download_name=f'optimized_{filename}')
+            return send_file(buffer, mimetype='image/jpeg', as_attachment=True, download_name='optimized_image.jpg')
         except Exception as e:
             flash(f"Error al procesar la imagen: {e}")
             return redirect(url_for('home'))
