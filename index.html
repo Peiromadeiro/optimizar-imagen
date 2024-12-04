@@ -52,29 +52,23 @@
     <script>
         const dragDropArea = document.getElementById('drag-drop-area');
         const fileInput = document.getElementById('file-input');
+        const form = document.getElementById('upload-form');
 
-        // Abrir el selector de archivos al hacer clic en el área
-        dragDropArea.addEventListener('click', () => fileInput.click());
+        // Prevenir comportamiento por defecto al arrastrar archivos
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, (e) => e.preventDefault());
+        });
 
         // Cambiar apariencia al arrastrar archivos sobre el área
-        dragDropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dragDropArea.classList.add('drag-over');
-        });
-
-        dragDropArea.addEventListener('dragleave', () => {
-            dragDropArea.classList.remove('drag-over');
-        });
-
-        // Capturar archivo al soltarlo
+        dragDropArea.addEventListener('dragover', () => dragDropArea.classList.add('drag-over'));
+        dragDropArea.addEventListener('dragleave', () => dragDropArea.classList.remove('drag-over'));
         dragDropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
             dragDropArea.classList.remove('drag-over');
 
-            // Si el archivo es arrastrado desde otra web
+            // Si el archivo arrastrado es una URL desde otra pestaña
             if (e.dataTransfer.items && e.dataTransfer.items[0].type === 'text/uri-list') {
                 const url = e.dataTransfer.getData('text/uri-list');
-                document.getElementById('url-input').value = url; // Coloca la URL en el campo de entrada
+                document.getElementById('url-input').value = url; // Colocar la URL en el campo
             } else {
                 // Si es un archivo local
                 const files = e.dataTransfer.files;
@@ -83,7 +77,11 @@
                 }
             }
         });
+
+        // Abrir el selector de archivos al hacer clic en el área
+        dragDropArea.addEventListener('click', () => fileInput.click());
     </script>
 </body>
 </html>
+
 
