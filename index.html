@@ -52,7 +52,7 @@
     <script>
         const dragDropArea = document.getElementById('drag-drop-area');
         const fileInput = document.getElementById('file-input');
-        const form = document.getElementById('upload-form');
+        const urlInput = document.getElementById('url-input');
 
         // Prevenir comportamiento por defecto al arrastrar archivos
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -62,13 +62,16 @@
         // Cambiar apariencia al arrastrar archivos sobre el área
         dragDropArea.addEventListener('dragover', () => dragDropArea.classList.add('drag-over'));
         dragDropArea.addEventListener('dragleave', () => dragDropArea.classList.remove('drag-over'));
+
+        // Capturar archivo al soltarlo
         dragDropArea.addEventListener('drop', (e) => {
             dragDropArea.classList.remove('drag-over');
 
-            // Si el archivo arrastrado es una URL desde otra pestaña
-            if (e.dataTransfer.items && e.dataTransfer.items[0].type === 'text/uri-list') {
+            // Detectar si es una URL arrastrada desde otra web
+            if (e.dataTransfer.types.includes('text/uri-list')) {
                 const url = e.dataTransfer.getData('text/uri-list');
-                document.getElementById('url-input').value = url; // Colocar la URL en el campo
+                urlInput.value = url; // Colocar la URL en el campo de entrada
+                alert("Imagen detectada desde una URL: " + url);
             } else {
                 // Si es un archivo local
                 const files = e.dataTransfer.files;
@@ -83,5 +86,3 @@
     </script>
 </body>
 </html>
-
-
