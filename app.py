@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from PIL import Image, ImageOps
 import os
@@ -36,49 +37,46 @@ def home():
 
 @app.route('/optimize', methods=['POST'])
 def optimize_image():
-    """Optimiza la imagen cargada."""
-    if 'image' not in request.files:
-        flash("No se ha seleccionado ninguna imagen.")
-        return redirect(url_for('home'))
+    """Optimiza la imagen cargada o descargada desde una URL."""
+    image = None
 
-    file = request.files['image']
-    if file.filename == '':
-        flash("Por favor, selecciona un archivo válido.")
-        return redirect(url_for('home'))
-
-    if file and allowed_file(file.filename):
-        try:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            # Guardar la imagen original
-            file.save(file_path)
-
-            # Abrir y procesar la imagen
-            img = Image.open(file_path)
-            
-            # Redimensionar manteniendo relación de aspecto y rellenar
-            resized_img = resize_with_aspect_ratio(img, 600, 400)
-
-            # Guardar como JPG optimizado
-            buffer = BytesIO()
-            resized_img.save(buffer, format="JPEG", optimize=True, quality=85)
-            buffer.seek(0)
-
-            # Guardar la imagen optimizada localmente (opcional)
-            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"optimized_image.jpg")
-            with open(optimized_path, 'wb') as f:
-                f.write(buffer.read())
-
-            # Devolver la imagen optimizada al cliente
-            buffer.seek(0)
-            flash("Imagen optimizada con éxito. Descárgala abajo.")
-            return send_file(buffer, mimetype='image/jpeg', as_attachment=True, download_name='optimized_image.jpg')
-        except Exception as e:
-            flash(f"Error al procesar la imagen: {e}")
+    # Comprobar si se subió un archivo
+    if 'image' in request.files and request.files['image'].filename != '':
+        file = request.files['image']
+        if allowed_file(file.filename):
+            image = Image.open(file)
+        else:
+            flash("Formato no admitido. Usa PNG, JPG, JPEG, WEBP, BMP o TIFF.")
             return redirect(url_for('home'))
-    else:
-        flash("Formato no admitido. Usa PNG, JPG, JPEG, WEBP, BMP o TIFF.")
+
+    # Comprobar si se proporcionó una URL
+    elif 'image_url' in request.form and request.form['image_url']:
+        url = request.form['image_url']
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            image = Image.open(BytesIO(response.content))
+        except Exception as e:
+            flash(f"No se pudo descargar la imagen de la URL: {e}")
+            return redirect(url_for('home'))
+
+    # Si no se proporcionó ni archivo ni URL
+    if image is None:
+        flash("Por favor, selecciona una imagen o proporciona una URL válida.")
+        return redirect(url_for('home'))
+
+    # Procesar la imagen
+    try:
+        resized_img = resize_with_aspect_ratio(image, 600, 400)
+
+        # Guardar como JPG optimizado
+        buffer = BytesIO()
+        resized_img.save(buffer, format="JPEG", optimize=True, quality=85)
+        buffer.seek(0)
+
+        return send_file(buffer, mimetype='image/jpeg', as_attachment=True, download_name='optimized_image.jpg')
+    except Exception as e:
+        flash(f"Error al procesar la imagen: {e}")
         return redirect(url_for('home'))
 
 if __name__ == '__main__':
