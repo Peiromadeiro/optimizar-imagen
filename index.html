@@ -54,7 +54,7 @@
         const fileInput = document.getElementById('file-input');
         const urlInput = document.getElementById('url-input');
 
-        // Prevenir comportamiento por defecto al arrastrar archivos
+        // Prevenir comportamiento por defecto al arrastrar y soltar
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dragDropArea.addEventListener(eventName, (e) => e.preventDefault());
         });
@@ -63,15 +63,15 @@
         dragDropArea.addEventListener('dragover', () => dragDropArea.classList.add('drag-over'));
         dragDropArea.addEventListener('dragleave', () => dragDropArea.classList.remove('drag-over'));
 
-        // Capturar archivo al soltarlo
+        // Capturar archivo o URL al soltarlo
         dragDropArea.addEventListener('drop', (e) => {
             dragDropArea.classList.remove('drag-over');
 
-            // Detectar si es una URL arrastrada desde otra web
-            if (e.dataTransfer.types.includes('text/uri-list')) {
-                const url = e.dataTransfer.getData('text/uri-list');
+            // Detectar si el contenido es una URL (arrastrado desde otra web)
+            const url = e.dataTransfer.getData('text/uri-list');
+            if (url) {
                 urlInput.value = url; // Colocar la URL en el campo de entrada
-                alert("Imagen detectada desde una URL: " + url);
+                alert("Imagen arrastrada desde la web detectada: " + url);
             } else {
                 // Si es un archivo local
                 const files = e.dataTransfer.files;
