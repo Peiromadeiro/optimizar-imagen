@@ -41,7 +41,7 @@
                 <label for="url-input" class="form-label">O introduce una URL de imagen:</label>
                 <input id="url-input" name="image_url" type="url" class="form-control" placeholder="https://example.com/imagen.jpg">
             </div>
-            <button class="btn btn-success mt-3">Optimizar Imagen</button>
+            <button id="submit-button" class="btn btn-success mt-3">Optimizar Imagen</button>
         </form>
 
         <footer class="text-center mt-5">
@@ -53,8 +53,9 @@
         const dragDropArea = document.getElementById('drag-drop-area');
         const fileInput = document.getElementById('file-input');
         const urlInput = document.getElementById('url-input');
+        const form = document.getElementById('upload-form');
 
-        // Prevenir comportamiento por defecto al arrastrar y soltar
+        // Prevenir comportamiento por defecto al arrastrar archivos
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dragDropArea.addEventListener(eventName, (e) => e.preventDefault());
         });
@@ -71,7 +72,6 @@
             const url = e.dataTransfer.getData('text/uri-list');
             if (url) {
                 urlInput.value = url; // Colocar la URL en el campo de entrada
-                alert("Imagen arrastrada desde la web detectada: " + url);
             } else {
                 // Si es un archivo local
                 const files = e.dataTransfer.files;
@@ -83,6 +83,14 @@
 
         // Abrir el selector de archivos al hacer clic en el área
         dragDropArea.addEventListener('click', () => fileInput.click());
+
+        // Limpiar campos después de enviar el formulario
+        form.addEventListener('submit', () => {
+            setTimeout(() => {
+                fileInput.value = "";  // Restablecer el input de archivo
+                urlInput.value = "";   // Restablecer el campo de URL
+            }, 100); // Dar tiempo al navegador para enviar el formulario
+        });
     </script>
 </body>
 </html>
